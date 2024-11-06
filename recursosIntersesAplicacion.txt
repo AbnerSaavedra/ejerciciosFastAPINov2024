@@ -1,0 +1,7 @@
+# Recursos o intereses es equivalente a decir entidades en nuestro alcance de solución
+
+Ejemplo, aplicación académica:
+
+Recursos, intereses o entidades:
+
+Estudiantes, profesores, materia, pensum, nivel.
