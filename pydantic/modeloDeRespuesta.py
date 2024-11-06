@@ -1,18 +1,19 @@
 from fastapi import FastAPI
+from typing import Optional
 from pydantic import BaseModel
 
 class Item(BaseModel):
     name: str
     description: str | None
     price: float
-    tax: float | None
+    tax: Optional[float] = None
 
 app = FastAPI()
 
 @app.get("/items")
 async def get_items() -> list[Item]:
     return [ Item(name="Item1", description="Desc1", price=12, tax=1.2 ),
-            Item(name="Item2", description="Desc2", price=13, tax=1.3 )  ]
+            Item(name="Item2", description="Desc2", price=13, tax=1.3 ) ]
 
 @app.post("/items")
 async def create_item(item: Item) -> Item:
