@@ -1,26 +1,27 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from pydantic import field_validator
-from datetime import *
-
-tiposHabitaciones = ["Individual", "Matrimonial", "Familiar"]
-
-fecha1 = datetime(year=2024, month=11, day=22)
-fecha2 = datetime(year=2024, month=11, day=20)
+from datetime import date
+from pydantic_core.core_schema import FieldValidationInfo
 
 class reservaHotel(BaseModel):
-    fechaEntrada: datetime
-    fechaSalida: datetime
+    fechaEntrada: date
+    fechaSalida: date
     cantHuespedes: int
     tipoHabitacion: str
 
     # Creamos nuestras validaciones propias
-    @field_validator("fechaEntrada", "fechaSalida")
-    def validarFechasReservacion(cls, fechaEntrada,fechaSalida):
-        print("Fecha entrada: ")
-        if fechaSalida <= fechaEntrada:
+    @field_validator("fechaEntrada")
+    def validate_fechaEntrada(cls, v, info: FieldValidationInfo):
+        if 'fechaSalida' in info.data and v >= info.data['fechaSalida']:
             raise ValueError("Fecha de salida no puede ser menor a la de entrada.")
+        return v
+    @field_validator("fechaSalida")
+    def validate_fechaSalida(cls, s, info: FieldValidationInfo):
+        if 'fechaEntrada' in info.data and s <= info.data['fechaEntrada']:
+            raise ValueError("Fecha de entrada no puede ser mayor a la de salida.")
+        return s
     @field_validator("cantHuespedes")
-    def validate_quantity(cantHuespedes):
+    def validate_quantity(cls, cantHuespedes, info: FieldValidationInfo):
         if cantHuespedes < 1:
             raise ValueError("Quantity not allowed")
         return cantHuespedes
@@ -32,9 +33,19 @@ class reservaHotel(BaseModel):
             raise ValueError("Tipo de habitación no válido.")
         return tipoHabitacion
 
-  
-reserva = reservaHotel(fechaEntrada=fecha1, fechaSalida=fecha2, cantHuespedes=-2, tipoHabitacion="duplex")
+tiposHabitaciones = ["Individual", "Matrimonial", "Familiar"]
 
-print("Reserva hotel: ", reserva)
+fecha1 = date(2024, 11, 22)
+fecha2 = date(2024, 11, 20)
+
+#reserva = reservaHotel(fechaEntrada=date(2024, 11, 22), fechaSalida=date(2024, 11, 20), cantHuespedes=-2, tipoHabitacion="duplex")
+
+try:
+    reserva = reservaHotel(fechaEntrada=fecha1, fechaSalida=fecha2, cantHuespedes=-2, tipoHabitacion="duplex")
+    print("Reserva hotel: ", reserva)
+except ValidationError as e:
+    print(e.json())
+  
+
 
 
