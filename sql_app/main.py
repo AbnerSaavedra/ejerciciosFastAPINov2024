@@ -10,9 +10,9 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-#app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-#templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates")
 
 # Dependency
 def get_db():
@@ -51,9 +51,7 @@ def create_user_for_item(user_id: int, item: schemas.ItemCreate, db: Session = D
 @app.get("/items/", response_model=list[schemas.Item])
 def read_items(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
-    return items
-    '''
     return templates.TemplateResponse(
-        request=request, name="item.html", context={"items": items}
+        request=request, name="item.html.jinja", context={"items": items}
     )
-    '''
+    #return items
